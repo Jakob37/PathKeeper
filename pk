@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
-import sqlite3
 import argparse
 import time
 import pathlib
 import os.path
 import inspect
+
+from modules.sqlite import execute_db, get_cursor
 
 src_file_path = inspect.getfile(lambda: None)
 DB = os.path.dirname(src_file_path) + "test.db"
@@ -16,46 +17,33 @@ def main():
 
     if args.subcommand == "setup":
         setup_db()
-
-    if args.subcommand == "add":
+    elif args.subcommand == "add":
         add_path(args.path, args.label)
-
-    if args.subcommand == "rm":
+    elif args.subcommand == "rm":
         remove_path(args.path_id, args.type)
-
-    if args.subcommand == "list":
-        # con = sqlite3.connect("DB")
-        list_all_paths(DB, args.showid)
+    elif args.subcommand == "list":
+        list_all_paths(args.showid)
+    else:
+        raise ValueError(f"Unknown subcommand: {args.subcommand}")
 
 
 def setup_db():
-    DB = os.path.dirname(src_file_path) + "test.db"
-    con = sqlite3.connect(DB)
-    cur = con.cursor()
-    cur.execute("CREATE TABLE path(id, label, path)")
-    con.commit()
+    execute_db(DB, "CREATE TABLE path(id, label, path)")
     print(f"New db created in {DB}")
 
 
 def remove_path(path_id: str, rm_type: "id|path|label" = "id"):
-    con = sqlite3.connect(DB)
-    cur = con.cursor()
-    cur.execute(f"DELETE FROM path WHERE {rm_type}='{path_id}'")
-    con.commit()
+    execute_db(DB, f"DELETE FROM path WHERE {rm_type}='{path_id}'")
 
 
 # https://docs.python.org/3/library/sqlite3.html
 def add_path(path: str, label: str = ""):
     my_id = time.time_ns()
-    con = sqlite3.connect(DB)
-    cur = con.cursor()
-    cur.execute(f"INSERT INTO path VALUES ('{my_id}', '{label}', '{path}')")
-    con.commit()
+    execute_db(DB, f"INSERT INTO path VALUES ('{my_id}', '{label}', '{path}')")
 
 
-def list_all_paths(db: str, show_id: bool = False):
-    con = sqlite3.connect(DB)
-    cur = con.cursor()
+def list_all_paths(show_id: bool = False):
+    con = get_cursor(DB)
     res = con.execute("SELECT * FROM path")
 
     header = f"path\tlabel"
