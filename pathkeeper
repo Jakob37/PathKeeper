@@ -13,17 +13,17 @@ def main():
         add_path(args.path, args.label)
 
     if args.subcommand == "rm":
-        remove_path(args.path_id)
+        remove_path(args.path_id, args.type)
 
     if args.subcommand == "list":
         # con = sqlite3.connect("test.db")
         list_all_paths("test.db", args.showid)
 
 
-def remove_path(path_id: str):
+def remove_path(path_id: str, rm_type: "id|path|label" = "id"):
     con = sqlite3.connect("test.db")
     cur = con.cursor()
-    cur.execute(f"DELETE FROM path WHERE id='{path_id}'")
+    cur.execute(f"DELETE FROM path WHERE {rm_type}='{path_id}'")
     con.commit()
 
 
@@ -70,6 +70,7 @@ def parse_arguments() -> any:
 
     remove = sub_parsers.add_parser("rm", help="Add new path")
     remove.add_argument("path_id")
+    remove.add_argument("--type", default="id", help="Removal field type")
 
     list_paths = sub_parsers.add_parser("list", help="List paths")
     list_paths.add_argument(
