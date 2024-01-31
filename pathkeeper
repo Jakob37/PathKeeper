@@ -12,9 +12,19 @@ def main():
     if args.subcommand == "add":
         add_path(args.path, args.label)
 
+    if args.subcommand == "rm":
+        remove_path(args.path_id)
+
     if args.subcommand == "list":
         # con = sqlite3.connect("test.db")
         list_all_paths("test.db", args.showid)
+
+
+def remove_path(path_id: str):
+    con = sqlite3.connect("test.db")
+    cur = con.cursor()
+    cur.execute(f"DELETE FROM path WHERE id='{path_id}'")
+    con.commit()
 
 
 # https://docs.python.org/3/library/sqlite3.html
@@ -58,7 +68,8 @@ def parse_arguments() -> any:
     add.add_argument("path")
     add.add_argument("--label")
 
-    remove = sub_parsers.add_parser("remove", help="Remove path")
+    remove = sub_parsers.add_parser("rm", help="Add new path")
+    remove.add_argument("path_id")
 
     list_paths = sub_parsers.add_parser("list", help="List paths")
     list_paths.add_argument(
