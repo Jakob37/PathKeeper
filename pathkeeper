@@ -4,10 +4,18 @@ import sqlite3
 import argparse
 import time
 import pathlib
+import os.path
+import inspect
+
+src_file_path = inspect.getfile(lambda: None)
+DB = os.path.dirname(src_file_path) + "test.db"
 
 
 def main():
     args = parse_arguments()
+
+    if args.subcommand == "setup":
+        setup_db()
 
     if args.subcommand == "add":
         add_path(args.path, args.label)
@@ -16,12 +24,21 @@ def main():
         remove_path(args.path_id, args.type)
 
     if args.subcommand == "list":
-        # con = sqlite3.connect("test.db")
-        list_all_paths("test.db", args.showid)
+        # con = sqlite3.connect("DB")
+        list_all_paths(DB, args.showid)
+
+
+def setup_db():
+    DB = os.path.dirname(src_file_path) + "test.db"
+    con = sqlite3.connect(DB)
+    cur = con.cursor()
+    cur.execute("CREATE TABLE path(id, label, path)")
+    con.commit()
+    print(f"New db created in {DB}")
 
 
 def remove_path(path_id: str, rm_type: "id|path|label" = "id"):
-    con = sqlite3.connect("test.db")
+    con = sqlite3.connect(DB)
     cur = con.cursor()
     cur.execute(f"DELETE FROM path WHERE {rm_type}='{path_id}'")
     con.commit()
@@ -30,14 +47,14 @@ def remove_path(path_id: str, rm_type: "id|path|label" = "id"):
 # https://docs.python.org/3/library/sqlite3.html
 def add_path(path: str, label: str = ""):
     my_id = time.time_ns()
-    con = sqlite3.connect("test.db")
+    con = sqlite3.connect(DB)
     cur = con.cursor()
     cur.execute(f"INSERT INTO path VALUES ('{my_id}', '{label}', '{path}')")
     con.commit()
 
 
 def list_all_paths(db: str, show_id: bool = False):
-    con = sqlite3.connect("test.db")
+    con = sqlite3.connect(DB)
     cur = con.cursor()
     res = con.execute("SELECT * FROM path")
 
@@ -63,6 +80,10 @@ def parse_arguments() -> any:
     parser = argparse.ArgumentParser()
 
     sub_parsers = parser.add_subparsers(dest="subcommand", required=True)
+
+    setup = sub_parsers.add_parser(
+        "setup", help="Setup the db next to the called script"
+    )
 
     add = sub_parsers.add_parser("add", help="Add new path")
     add.add_argument("path")
