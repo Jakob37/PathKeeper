@@ -2,8 +2,7 @@
 
 import sqlite3
 import argparse
-
-# con = sqlite3.connect("test.db")
+import time
 
 
 def main():
@@ -11,7 +10,25 @@ def main():
 
     print(args.subcommand)
 
+    if args.subcommand == "add":
+        add_path(args.label, args.path)
+
+    if args.subcommand == "list":
+        # con = sqlite3.connect("test.db")
+        print("List paths")
+        list_all_paths("test.db")
+
     # if args.
+
+
+def add_path(label: str, path: str):
+    my_id = time.time_ns()
+    cur.execute(f"INSERT INTO path VALUES ('{my_id}', '{label}', '{path}')")
+
+
+def list_all_paths(db: str):
+    con = sqlite3.connect("test.db")
+    con.execute("SELECT * FROM path")
 
 
 print("Hello word")
@@ -23,6 +40,9 @@ def parse_arguments() -> any:
     sub_parsers = parser.add_subparsers(dest="subcommand", required=True)
 
     add = sub_parsers.add_parser("add", help="Add new path")
+    add.add_argument("--path", required=True)
+    add.add_argument("--label", required=True)
+
     remove = sub_parsers.add_parser("remove", help="Remove path")
 
     list_paths = sub_parsers.add_parser("list", help="List paths")
