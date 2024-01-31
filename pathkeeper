@@ -8,30 +8,31 @@ import time
 def main():
     args = parse_arguments()
 
-    print(args.subcommand)
-
     if args.subcommand == "add":
-        add_path(args.label, args.path)
+        add_path(args.path, args.label)
 
     if args.subcommand == "list":
         # con = sqlite3.connect("test.db")
-        print("List paths")
         list_all_paths("test.db")
 
-    # if args.
 
-
-def add_path(label: str, path: str):
+# https://docs.python.org/3/library/sqlite3.html
+def add_path(path: str, label: str = ""):
     my_id = time.time_ns()
+    con = sqlite3.connect("test.db")
+    cur = con.cursor()
     cur.execute(f"INSERT INTO path VALUES ('{my_id}', '{label}', '{path}')")
+    con.commit()
 
 
 def list_all_paths(db: str):
     con = sqlite3.connect("test.db")
-    con.execute("SELECT * FROM path")
-
-
-print("Hello word")
+    cur = con.cursor()
+    res = con.execute("SELECT * FROM path")
+    for row in res.fetchall():
+        label = row[1]
+        path = row[2]
+        print(f"{path}\t{label}")
 
 
 def parse_arguments() -> any:
@@ -40,8 +41,8 @@ def parse_arguments() -> any:
     sub_parsers = parser.add_subparsers(dest="subcommand", required=True)
 
     add = sub_parsers.add_parser("add", help="Add new path")
-    add.add_argument("--path", required=True)
-    add.add_argument("--label", required=True)
+    add.add_argument("path")
+    add.add_argument("--label")
 
     remove = sub_parsers.add_parser("remove", help="Remove path")
 
