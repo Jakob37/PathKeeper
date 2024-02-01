@@ -34,9 +34,12 @@ def setup_db():
 
 def remove_path(path_id: str, rm_type: "id|path|label" = "id"):
     print("Warning / FIXME: Removing broadly")
-    execute_db(DB, f"DELETE FROM path WHERE id='{path_id}'")
-    execute_db(DB, f"DELETE FROM path WHERE path='{path_id}'")
-    execute_db(DB, f"DELETE FROM path WHERE label='{path_id}'")
+    c1 = execute_db(DB, f"DELETE FROM path WHERE id='{path_id}'")
+    c2 = execute_db(DB, f"DELETE FROM path WHERE path='{path_id}'")
+    c3 = execute_db(DB, f"DELETE FROM path WHERE label='{path_id}'")
+    rm_count = c1 + c2 + c3
+    print("rm count", rm_count)
+    # print(c1, c2, c3)
 
 
 # https://docs.python.org/3/library/sqlite3.html
