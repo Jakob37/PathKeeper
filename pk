@@ -33,7 +33,10 @@ def setup_db():
 
 
 def remove_path(path_id: str, rm_type: "id|path|label" = "id"):
-    execute_db(DB, f"DELETE FROM path WHERE {rm_type}='{path_id}'")
+    print("Warning / FIXME: Removing broadly")
+    execute_db(DB, f"DELETE FROM path WHERE id='{path_id}'")
+    execute_db(DB, f"DELETE FROM path WHERE path='{path_id}'")
+    execute_db(DB, f"DELETE FROM path WHERE label='{path_id}'")
 
 
 # https://docs.python.org/3/library/sqlite3.html
@@ -75,7 +78,7 @@ def parse_arguments() -> any:
 
     add = sub_parsers.add_parser("add", help="Add new path")
     add.add_argument("path")
-    add.add_argument("--label")
+    add.add_argument("--label", default="")
 
     remove = sub_parsers.add_parser("rm", help="Add new path")
     remove.add_argument("path_id")
