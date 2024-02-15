@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-import argparse
 import time
 import pathlib
 import os.path
 import inspect
 
 from modules.sqlite import execute_db, get_cursor
+from modules.parse_args import parse_arguments
 
 src_file_path = inspect.getfile(lambda: None)
 DB = os.path.dirname(src_file_path) + "test.db"
@@ -18,11 +18,11 @@ def main():
     if args.subcommand == "setup":
         setup_db()
     elif args.subcommand == "add":
-        add_path(args.path, args.label)
+        add_path(args.path, args.label, args.alias)
     elif args.subcommand == "rm":
         remove_path(args.path_id, args.type)
-    elif args.subcommand == "list":
-        list_all_paths(args.showid)
+    elif args.subcommand == "view":
+        view_all_paths(args.showid)
     else:
         raise ValueError(f"Unknown subcommand: {args.subcommand}")
 
@@ -43,12 +43,14 @@ def remove_path(path_id: str, rm_type: "id|path|label" = "id"):
 
 
 # https://docs.python.org/3/library/sqlite3.html
-def add_path(path: str, label: str = ""):
+def add_path(path: str, label: str, alias: str):
     my_id = time.time_ns()
-    execute_db(DB, f"INSERT INTO path VALUES ('{my_id}', '{label}', '{path}')")
+    execute_db(
+        DB, f"INSERT INTO path VALUES ('{my_id}', '{label}', '{path}', '{alias}')"
+    )
 
 
-def list_all_paths(show_id: bool = False):
+def view_all_paths(show_id: bool = False):
     con = get_cursor(DB)
     res = con.execute("SELECT * FROM path")
 
@@ -68,38 +70,6 @@ def list_all_paths(show_id: bool = False):
             path_id = row[0]
             value_line = f"{path_id}\t" + value_line
         print(value_line)
-
-
-def parse_arguments() -> any:
-    parser = argparse.ArgumentParser()
-
-    sub_parsers = parser.add_subparsers(dest="subcommand", required=True)
-
-    setup = sub_parsers.add_parser(
-        "setup", help="Setup the db next to the called script"
-    )
-
-    add = sub_parsers.add_parser("add", help="Add new path")
-    add.add_argument("path")
-    add.add_argument("--label", default="")
-
-    remove = sub_parsers.add_parser("rm", help="Add new path")
-    remove.add_argument("path_id")
-    remove.add_argument("--type", default="id", help="Removal field type")
-
-    list_paths = sub_parsers.add_parser("list", help="List paths")
-    list_paths.add_argument(
-        "--showid", action="store_const", const=True, help="Show ID column"
-    )
-    # list_paths.add_argument('')
-
-    goto = sub_parsers.add_parser("goto", help="Go to path")
-    goto.add_argument("path", help="Path")
-    # parser_crazy.add_argument('--fool', action='store_const', const=True, help='it is foolish option')
-
-    args = parser.parse_args()
-
-    return args
 
 
 if __name__ == "__main__":
