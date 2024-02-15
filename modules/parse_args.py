@@ -29,6 +29,9 @@ def parse_arguments() -> any:
     goto.add_argument("path", help="Path")
     # parser_crazy.add_argument('--fool', action='store_const', const=True, help='it is foolish option')
 
+    alias = sub_parsers.add_parser("alias", help="Work with aliases")
+    alias.add_argument("path", help="Output path for aliases")
+
     args = parser.parse_args()
 
     return args

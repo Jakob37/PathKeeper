@@ -5,11 +5,12 @@ import pathlib
 import os.path
 import inspect
 
-from modules.sqlite import execute_db, get_cursor
+from modules.sqlite import execute_db, get_cursor, get_res
 from modules.parse_args import parse_arguments
 
 src_file_path = inspect.getfile(lambda: None)
-DB = os.path.dirname(src_file_path) + "test.db"
+DB = os.path.dirname(src_file_path) + "/test.db"
+# print(f"Using: {DB}")
 
 
 def main():
@@ -23,8 +24,23 @@ def main():
         remove_path(args.path_id, args.type)
     elif args.subcommand == "view":
         view_all_paths(args.showid)
+    elif args.subcommand == "alias":
+        alias(args.path)
     else:
         raise ValueError(f"Unknown subcommand: {args.subcommand}")
+
+
+def alias(out_path: str):
+    # res = execute_db(DB, "SELECT * FROM path")
+    results = get_res(DB, "SELECT alias, path FROM path")
+    nbr = 0
+    with open(out_path, "w") as out_fh:
+        for res in results:
+            (alias, path) = res
+            if alias is not None:
+                nbr += 1
+                print(f'alias {alias}="cd {path}"', file=out_fh)
+    print(f"{nbr} aliases written to {out_path}")
 
 
 def setup_db():
@@ -54,7 +70,7 @@ def view_all_paths(show_id: bool = False):
     con = get_cursor(DB)
     res = con.execute("SELECT * FROM path")
 
-    header = f"path\tlabel"
+    header = f"path\tlabel\talias"
     divider = "-" * 20
     if show_id:
         header = "id\t" + header

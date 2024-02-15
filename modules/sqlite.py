@@ -14,3 +14,10 @@ def get_cursor(db: str):
     con = sqlite3.connect(db)
     cur = con.cursor()
     return cur
+
+
+def get_res(db: str, command: str) -> list[any]:
+    con = sqlite3.connect(db)
+    cur = con.cursor()
+    res = con.execute(command)
+    return list(res.fetchall())
