@@ -81,7 +81,8 @@ def view_all_paths(show_id: bool = False):
     for row in res.fetchall():
         label = row[1]
         path = row[2]
-        value_line = f"{path}\t{label}"
+        alias = row[2]
+        value_line = f"{path}\t{label}\t{alias}"
         if show_id:
             path_id = row[0]
             value_line = f"{path_id}\t" + value_line
