@@ -87,14 +87,21 @@ def view_all_paths(show_id: bool = False):
 
     print(max_lengths)
 
-    header_format = "\t".join(header)
-
+    header_format = "\t".join("{:<" + str(max_len) + "}" for max_len in max_lengths)
     print(header_format)
-    # print(divider)
+    print(header)
+
+    print(header_format.format(*header))
+    divider = "-" * (sum(max_lengths) + len("".join(header)) + 1)
+    print(divider)
     for row in rows:
-        label = row[1]
-        path = row[2]
-        alias = row[3]
+        if not show_id:
+            row = row[1:]
+        values_format = "\t".join(row)
+        print(values_format)
+        # label = row[1]
+        # path = row[2]
+        # alias = row[3]
         # value_line = f"{path}\t{label}\t{alias}"
         # if show_id:
         #     path_id = row[0]
