@@ -70,23 +70,36 @@ def view_all_paths(show_id: bool = False):
     con = get_cursor(DB)
     res = con.execute("SELECT * FROM path")
 
-    header = f"path\tlabel\talias"
-    divider = "-" * 20
+    header = ["path", "label", "alias"]
+    # divider = "-" * 20
     if show_id:
-        header = "id\t" + header
-        divider = "-" * 30
+        header = ["id"] + header
+    #     divider = "-" * 30
 
-    print(header)
-    print(divider)
-    for row in res.fetchall():
+    rows = list(res.fetchall())
+    max_lengths = [0] * len(rows[0])
+
+    for row in rows:
+        for i, val in enumerate(row):
+            cur_max = max_lengths[i]
+            if len(val) > cur_max:
+                max_lengths[i] = len(val)
+
+    print(max_lengths)
+
+    header_format = "\t".join(header)
+
+    print(header_format)
+    # print(divider)
+    for row in rows:
         label = row[1]
         path = row[2]
         alias = row[3]
-        value_line = f"{path}\t{label}\t{alias}"
-        if show_id:
-            path_id = row[0]
-            value_line = f"{path_id}\t" + value_line
-        print(value_line)
+        # value_line = f"{path}\t{label}\t{alias}"
+        # if show_id:
+        #     path_id = row[0]
+        #     value_line = f"{path_id}\t" + value_line
+        # print(value_line)
 
 
 if __name__ == "__main__":
