@@ -71,12 +71,12 @@ def view_all_paths(show_id: bool = False):
     res = con.execute("SELECT * FROM path")
 
     header = ["path", "label", "alias"]
-    # divider = "-" * 20
+    rows = list(res.fetchall())
     if show_id:
         header = ["id"] + header
-    #     divider = "-" * 30
+    else:
+        rows = [row[1:] for row in rows]
 
-    rows = list(res.fetchall())
     max_lengths = [0] * len(rows[0])
 
     for row in rows:
@@ -85,28 +85,13 @@ def view_all_paths(show_id: bool = False):
             if len(val) > cur_max:
                 max_lengths[i] = len(val)
 
-    print(max_lengths)
+    format_template = "\t".join("{:<" + str(max_len) + "}" for max_len in max_lengths)
 
-    header_format = "\t".join("{:<" + str(max_len) + "}" for max_len in max_lengths)
-    print(header_format)
-    print(header)
-
-    print(header_format.format(*header))
+    print(format_template.format(*header))
     divider = "-" * (sum(max_lengths) + len("".join(header)) + 1)
     print(divider)
     for row in rows:
-        if not show_id:
-            row = row[1:]
-        values_format = "\t".join(row)
-        print(values_format)
-        # label = row[1]
-        # path = row[2]
-        # alias = row[3]
-        # value_line = f"{path}\t{label}\t{alias}"
-        # if show_id:
-        #     path_id = row[0]
-        #     value_line = f"{path_id}\t" + value_line
-        # print(value_line)
+        print(format_template.format(*row))
 
 
 if __name__ == "__main__":
